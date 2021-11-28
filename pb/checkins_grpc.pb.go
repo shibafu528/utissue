@@ -18,7 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CheckinsClient interface {
-	Create(ctx context.Context, in *CheckinRequest, opts ...grpc.CallOption) (*CheckinResponse, error)
+	Create(ctx context.Context, in *CreateCheckinRequest, opts ...grpc.CallOption) (*CreateCheckinResponse, error)
+	Get(ctx context.Context, in *GetCheckinRequest, opts ...grpc.CallOption) (*GetCheckinResponse, error)
 }
 
 type checkinsClient struct {
@@ -29,9 +30,18 @@ func NewCheckinsClient(cc grpc.ClientConnInterface) CheckinsClient {
 	return &checkinsClient{cc}
 }
 
-func (c *checkinsClient) Create(ctx context.Context, in *CheckinRequest, opts ...grpc.CallOption) (*CheckinResponse, error) {
-	out := new(CheckinResponse)
+func (c *checkinsClient) Create(ctx context.Context, in *CreateCheckinRequest, opts ...grpc.CallOption) (*CreateCheckinResponse, error) {
+	out := new(CreateCheckinResponse)
 	err := c.cc.Invoke(ctx, "/shibafu528.utissue.Checkins/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *checkinsClient) Get(ctx context.Context, in *GetCheckinRequest, opts ...grpc.CallOption) (*GetCheckinResponse, error) {
+	out := new(GetCheckinResponse)
+	err := c.cc.Invoke(ctx, "/shibafu528.utissue.Checkins/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +52,8 @@ func (c *checkinsClient) Create(ctx context.Context, in *CheckinRequest, opts ..
 // All implementations must embed UnimplementedCheckinsServer
 // for forward compatibility
 type CheckinsServer interface {
-	Create(context.Context, *CheckinRequest) (*CheckinResponse, error)
+	Create(context.Context, *CreateCheckinRequest) (*CreateCheckinResponse, error)
+	Get(context.Context, *GetCheckinRequest) (*GetCheckinResponse, error)
 	mustEmbedUnimplementedCheckinsServer()
 }
 
@@ -50,8 +61,11 @@ type CheckinsServer interface {
 type UnimplementedCheckinsServer struct {
 }
 
-func (UnimplementedCheckinsServer) Create(context.Context, *CheckinRequest) (*CheckinResponse, error) {
+func (UnimplementedCheckinsServer) Create(context.Context, *CreateCheckinRequest) (*CreateCheckinResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedCheckinsServer) Get(context.Context, *GetCheckinRequest) (*GetCheckinResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedCheckinsServer) mustEmbedUnimplementedCheckinsServer() {}
 
@@ -67,7 +81,7 @@ func RegisterCheckinsServer(s grpc.ServiceRegistrar, srv CheckinsServer) {
 }
 
 func _Checkins_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckinRequest)
+	in := new(CreateCheckinRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -79,7 +93,25 @@ func _Checkins_Create_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/shibafu528.utissue.Checkins/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CheckinsServer).Create(ctx, req.(*CheckinRequest))
+		return srv.(CheckinsServer).Create(ctx, req.(*CreateCheckinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Checkins_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCheckinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckinsServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/shibafu528.utissue.Checkins/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckinsServer).Get(ctx, req.(*GetCheckinRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -94,6 +126,10 @@ var Checkins_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _Checkins_Create_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _Checkins_Get_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

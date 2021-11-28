@@ -8,16 +8,25 @@ import "shibafu528/utissue/checkin.proto";
 option go_package = "github.com/shibafu528/utissue/pb";
 
 service Checkins {
-  rpc Create(CheckinRequest) returns (CheckinResponse);
+  rpc Create(CreateCheckinRequest) returns (CreateCheckinResponse);
+  rpc Get(GetCheckinRequest) returns (GetCheckinResponse);
 }
 
-message CheckinRequest {
+message CreateCheckinRequest {
   google.protobuf.Timestamp checked_in_at = 1;
   string note = 2;
   string link = 3;
   repeated string tags = 4;
 }
 
-message CheckinResponse {
+message CreateCheckinResponse {
+  Checkin checkin = 1;
+}
+
+message GetCheckinRequest {
+  uint64 id = 1;
+}
+
+message GetCheckinResponse {
   Checkin checkin = 1;
 }
