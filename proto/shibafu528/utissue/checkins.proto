@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package shibafu528.utissue;
+
+import "google/protobuf/timestamp.proto";
+import "shibafu528/utissue/checkin.proto";
+
+option go_package = "github.com/shibafu528/utissue/pb";
+
+service Checkins {
+  rpc Create(CheckinRequest) returns (CheckinResponse);
+}
+
+message CheckinRequest {
+  google.protobuf.Timestamp checked_in_at = 1;
+  string note = 2;
+  string link = 3;
+  repeated string tags = 4;
+}
+
+message CheckinResponse {
+  Checkin checkin = 1;
+}
