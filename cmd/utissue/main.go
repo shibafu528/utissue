@@ -14,7 +14,7 @@ import (
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/shibafu528/utissue/pb"
-	"github.com/shibafu528/utissue/services"
+	"github.com/shibafu528/utissue/servers"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
@@ -51,7 +51,7 @@ func main() {
 			grpc_recovery.UnaryServerInterceptor(),
 		)),
 	)
-	pb.RegisterCheckinsServer(s, services.NewCheckinsServer())
+	pb.RegisterCheckinsServer(s, servers.NewCheckinsServer())
 
 	// handle SIGINT, SIGTERM
 	sigch := make(chan os.Signal, 1)
