@@ -13,6 +13,9 @@ require (
 
 require (
 	github.com/andybalholm/cascadia v1.3.1 // indirect
+	github.com/getsentry/sentry-go v0.11.0 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
+	github.com/myouju/grpc-middleware-sentry v0.3.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect

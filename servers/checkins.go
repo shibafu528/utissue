@@ -8,6 +8,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/shibafu528/utissue/pb"
 	"github.com/shibafu528/utissue/precum"
 	"go.uber.org/zap"
@@ -107,6 +108,7 @@ func (s *server) Create(ctx context.Context, request *pb.CreateCheckinRequest) (
 			}
 		} else {
 			zap.S().Errorf("material resolve error: %v", err)
+			sentry.CaptureException(err)
 		}
 	}
 

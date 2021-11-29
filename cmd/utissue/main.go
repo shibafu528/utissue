@@ -1,18 +1,24 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	"github.com/joho/godotenv"
+	grpc_sentry "github.com/myouju/grpc-middleware-sentry"
 	"github.com/shibafu528/utissue/pb"
 	"github.com/shibafu528/utissue/servers"
 	"go.uber.org/zap"
@@ -26,6 +32,15 @@ var (
 
 func main() {
 	flag.Parse()
+
+	err := godotenv.Load()
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		log.Fatalf("failed to load .env: %v", err)
+	}
+
+	if initSentry() {
+		defer sentry.Flush(2 * time.Second)
+	}
 
 	logger, _ := newLogger()
 	defer logger.Sync()
@@ -44,12 +59,14 @@ func main() {
 			grpc_zap.StreamServerInterceptor(logger),
 			//grpc_auth.StreamServerInterceptor(myAuthFunction),
 			grpc_recovery.StreamServerInterceptor(),
+			grpc_sentry.StreamServerInterceptor(),
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_zap.UnaryServerInterceptor(logger),
 			//grpc_auth.UnaryServerInterceptor(myAuthFunction),
 			grpc_recovery.UnaryServerInterceptor(),
+			grpc_sentry.UnaryServerInterceptor(),
 		)),
 	)
 	pb.RegisterCheckinsServer(s, servers.NewCheckinsServer())
@@ -78,4 +95,18 @@ func newLogger() (*zap.Logger, error) {
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	return config.Build()
+}
+
+func initSentry() bool {
+	dsn := os.Getenv("SENTRY_DSN")
+	if len(dsn) != 0 {
+		err := sentry.Init(sentry.ClientOptions{
+			Dsn: dsn,
+		})
+		if err != nil {
+			log.Fatalf("failed to init sentry: %v", err)
+		}
+		return true
+	}
+	return false
 }
