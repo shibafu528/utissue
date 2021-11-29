@@ -3,6 +3,7 @@ syntax = "proto3";
 package shibafu528.utissue;
 
 import "google/protobuf/timestamp.proto";
+import "shibafu528/utissue/material.proto";
 import "shibafu528/utissue/user.proto";
 
 option go_package = "github.com/shibafu528/utissue/pb";
@@ -14,4 +15,5 @@ message Checkin {
   string note = 4;
   string link = 5;
   repeated string tags = 6;
+  Material material = 7;
 }

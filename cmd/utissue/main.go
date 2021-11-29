@@ -29,6 +29,7 @@ func main() {
 
 	logger, _ := newLogger()
 	defer logger.Sync()
+	zap.ReplaceGlobals(logger)
 	sugar := logger.Sugar()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))

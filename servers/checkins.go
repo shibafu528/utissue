@@ -9,6 +9,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/shibafu528/utissue/pb"
+	"github.com/shibafu528/utissue/precum"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -92,6 +94,22 @@ func (s *server) Create(ctx context.Context, request *pb.CreateCheckinRequest) (
 		Tags:        request.Tags,
 	}
 	s.checkinSeq++
+
+	if len(request.Link) != 0 {
+		m, err := precum.Resolve(request.Link)
+		if err == nil {
+			c.Material = &pb.Material{
+				Url:         m.Url,
+				Title:       m.Title,
+				Description: m.Description,
+				Image:       m.Image,
+				Tags:        m.Tags,
+			}
+		} else {
+			zap.S().Errorf("material resolve error: %v", err)
+		}
+	}
+
 	s.checkins[c.Id] = c
 
 	return &pb.CreateCheckinResponse{Checkin: c}, nil
