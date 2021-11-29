@@ -9,6 +9,8 @@ var registry = []resolverPattern{
 	{regexp.MustCompile(".*"), func() Resolver { return NewOGPResolver() }},
 }
 
+var cache = map[string]*Material{}
+
 var (
 	// 処理に全く対応していないURLが渡された時のエラー
 	ErrUnsupportedUrl = errors.New("unsupported url")
@@ -34,12 +36,18 @@ type resolverPattern struct {
 }
 
 func Resolve(url string) (*Material, error) {
+	if m, ok := cache[url]; ok {
+		return m, nil
+	}
 	for _, e := range registry {
 		if e.pattern.MatchString(url) {
 			// TODO: with timeout
 			m, err := e.factory().Resolve(url)
 			if errors.Is(err, ErrUnsupportedContent) {
 				continue
+			}
+			if err == nil {
+				cache[url] = m
 			}
 			return m, err
 		}
