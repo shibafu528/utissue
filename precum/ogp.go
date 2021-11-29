@@ -58,8 +58,7 @@ func (r *ogpResolver) Resolve(url string) (*Material, error) {
 
 func findMeta(doc *goquery.Document, selectors ...string) (string, bool) {
 	for _, sel := range selectors {
-		t := doc.Find(sel).First()
-		if t.Length() != 0 {
+		if t := doc.Find(sel).First(); t.Length() != 0 {
 			a, ok := t.Attr("content")
 			if ok {
 				return a, true
