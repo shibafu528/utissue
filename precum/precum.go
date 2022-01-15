@@ -1,6 +1,7 @@
 package precum
 
 import (
+	"context"
 	"errors"
 	"regexp"
 
@@ -28,14 +29,13 @@ type resolverPattern struct {
 
 var cache = map[string]*Material{}
 
-func Resolve(url string) (*Material, error) {
+func Resolve(ctx context.Context, url string) (*Material, error) {
 	if m, ok := cache[url]; ok {
 		return m, nil
 	}
 	for _, e := range registry {
 		if e.pattern.MatchString(url) {
-			// TODO: with timeout
-			m, err := e.factory().Resolve(url)
+			m, err := e.factory().Resolve(ctx, url)
 			if errors.Is(err, ErrUnsupportedContent) {
 				continue
 			}

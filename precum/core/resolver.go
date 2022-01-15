@@ -1,5 +1,7 @@
 package core
 
+import "context"
+
 type Resolver interface {
-	Resolve(url string) (*Material, error)
+	Resolve(ctx context.Context, url string) (*Material, error)
 }

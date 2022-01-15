@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -15,11 +16,11 @@ func NewOGPResolver() core.Resolver {
 	return &ogpResolver{}
 }
 
-func (r *ogpResolver) Resolve(url string) (*core.Material, error) {
+func (r *ogpResolver) Resolve(ctx context.Context, url string) (*core.Material, error) {
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("OGPResolver(http.NewRequest): %w", err)
 	}
