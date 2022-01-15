@@ -1,4 +1,4 @@
-package precum
+package resolver
 
 import (
 	"fmt"
@@ -6,15 +6,16 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/shibafu528/utissue/precum/core"
 )
 
 type ogpResolver struct{}
 
-func NewOGPResolver() Resolver {
+func NewOGPResolver() core.Resolver {
 	return &ogpResolver{}
 }
 
-func (r *ogpResolver) Resolve(url string) (*Material, error) {
+func (r *ogpResolver) Resolve(url string) (*core.Material, error) {
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -37,7 +38,7 @@ func (r *ogpResolver) Resolve(url string) (*Material, error) {
 		return nil, fmt.Errorf("OGPResolver(goquery.NewDocumentFromReader): %w", err)
 	}
 
-	m := &Material{Url: url}
+	m := &core.Material{Url: url}
 	if s, ok := findMeta(doc, "meta[property=\"og:title\"]", "meta[property=\"twitter:title\"]"); ok {
 		m.Title = s
 	}

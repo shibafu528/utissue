@@ -3,13 +3,10 @@ package precum
 import (
 	"errors"
 	"regexp"
+
+	"github.com/shibafu528/utissue/precum/core"
+	"github.com/shibafu528/utissue/precum/resolver"
 )
-
-var registry = []resolverPattern{
-	{regexp.MustCompile(".*"), func() Resolver { return NewOGPResolver() }},
-}
-
-var cache = map[string]*Material{}
 
 var (
 	// 処理に全く対応していないURLが渡された時のエラー
@@ -18,22 +15,18 @@ var (
 	ErrUnsupportedContent = errors.New("unsupported content")
 )
 
-type Material struct {
-	Url         string
-	Title       string
-	Description string
-	Image       string
-	Tags        []string
-}
+type Material = core.Material
 
-type Resolver interface {
-	Resolve(url string) (*Material, error)
+var registry = []resolverPattern{
+	{regexp.MustCompile(".*"), func() core.Resolver { return resolver.NewOGPResolver() }},
 }
 
 type resolverPattern struct {
 	pattern *regexp.Regexp
-	factory func() Resolver
+	factory func() core.Resolver
 }
+
+var cache = map[string]*Material{}
 
 func Resolve(url string) (*Material, error) {
 	if m, ok := cache[url]; ok {
